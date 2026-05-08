@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eeveelution Card Prices</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09090f;--panel:#0f0f1c;--surface:#161625;--surface2:#1d1d2e;
+  --border:#252540;--border2:#2e2e50;
+  --text:#e2e8f0;--muted:#5a6a82;--accent:#7c3aed;--gold:#fbbf24;--green:#10b981;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+
+/* ── Header ── */
+header{height:46px;flex-shrink:0;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;z-index:20}
+.logo{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;background:linear-gradient(120deg,#a78bfa,#f59e0b,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+header .spacer{flex:1}
+.hbtn{display:flex;align-items:center;gap:5px;padding:5px 11px;background:var(--surface2);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
+.hbtn:hover{border-color:var(--accent);color:#a78bfa}
+.hbtn.on{background:rgba(124,58,237,.2);border-color:#7c3aed;color:#a78bfa}
+.hbtn.ann-mode{background:rgba(251,191,36,.12);border-color:var(--gold);color:var(--gold)}
+
+/* ── Layout ── */
+.app{display:flex;flex:1;overflow:hidden}
+.sidebar{width:256px;min-width:256px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.sidebar-scroll{flex:1;overflow-y:auto;padding:14px}
+.sidebar-scroll::-webkit-scrollbar{width:3px}
+.sidebar-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── Controls ── */
+.ctrl-section{margin-bottom:18px}
+.ctrl-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.ctrl-label svg{flex-shrink:0}
+.btn-group{display:flex;gap:3px}
+.btn{flex:1;padding:5px 7px;background:var(--surface2);border:1px solid var(--border2);border-radius:5px;color:var(--muted);font-size:11px;font-weight:500;cursor:pointer;transition:all .15s;font-family:inherit;text-align:center}
+.btn:hover{border-color:var(--accent);color:var(--text)}
+.btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.radio-group{display:flex;flex-direction:column;gap:3px}
+.radio-opt{display:flex;align-items:center;gap:7px;padding:5px 9px;background:var(--surface2);border:1px solid var(--border2);border-radius:5px;cursor:pointer;transition:all .15s}
+.radio-opt:hover{border-color:var(--accent)}
+.radio-opt.active{border-color:var(--accent);background:rgba(124,58,237,.1)}
+.radio-opt input{display:none}
+.rdot{width:8px;height:8px;border-radius:50%;border:2px solid var(--muted);transition:all .15s;flex-shrink:0}
+.radio-opt.active .rdot{border-color:var(--accent);background:var(--accent)}
+.radio-opt span{font-size:11px}
+
+select{width:100%;padding:5px 24px 5px 8px;background:var(--surface2);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-size:11px;font-family:inherit;cursor:pointer;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5' viewBox='0 0 9 5'%3E%3Cpath fill='%235a6a82' d='M4.5 5L0 0h9z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+select:focus{border-color:var(--accent)}
+
+.divider{height:1px;background:var(--border);margin:4px 0 16px}
+
+.tog-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.tog-row span{font-size:11px;color:var(--text)}
+.tog{position:relative;width:30px;height:16px;cursor:pointer}
+.tog input{display:none}
+.tog-track{position:absolute;inset:0;background:var(--border2);border-radius:8px;transition:background .2s}
+.tog-thumb{position:absolute;top:2px;left:2px;width:12px;height:12px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.tog input:checked~.tog-track{background:var(--accent)}
+.tog input:checked~.tog-thumb{transform:translateX(14px)}
+
+.slider-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.slider-row span{font-size:10px;color:var(--muted)}
+.sval{font-size:11px;font-weight:600;color:var(--gold)}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:3px;background:var(--border);border-radius:2px;outline:none;margin:4px 0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:12px;height:12px;background:var(--accent);border-radius:50%;cursor:pointer}
+
+.speed-row{display:flex;gap:3px}
+.speed-btn{flex:1;padding:4px;border:1px solid var(--border2);border-radius:5px;font-size:10px;color:var(--muted);background:var(--surface2);cursor:pointer;font-family:inherit;text-align:center;transition:all .15s}
+.speed-btn:hover{border-color:var(--accent);color:var(--text)}
+.speed-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* Palette swatches */
+.palette-row{display:flex;gap:5px;flex-wrap:wrap}
+.pal-swatch{width:22px;height:22px;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:all .15s}
+.pal-swatch:hover,.pal-swatch.active{border-color:#fff;transform:scale(1.15)}
+
+/* ── Annotation list ── */
+.ann-add-btn{width:100%;padding:7px;border:1px dashed var(--border2);border-radius:5px;background:transparent;color:var(--muted);font-size:11px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s;margin-bottom:8px}
+.ann-add-btn:hover{border-color:var(--gold);color:var(--gold)}
+.ann-add-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(251,191,36,.08)}
+
+.ann-item{display:flex;align-items:center;gap:5px;padding:5px 7px;background:var(--surface2);border:1px solid var(--border2);border-radius:5px;margin-bottom:4px;cursor:pointer;transition:all .15s}
+.ann-item:hover{border-color:var(--border2)}
+.ann-item.selected{border-color:var(--gold)}
+.ann-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ann-text{flex:1;font-size:10px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ann-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:1px 3px;border-radius:3px;line-height:1;transition:color .15s}
+.ann-btn:hover{color:var(--text)}
+
+/* Annotation inline editor */
+.ann-edit-form{background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:10px;margin-top:6px;margin-bottom:6px}
+.ann-edit-form input[type=text]{width:100%;padding:5px 8px;background:var(--bg);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;outline:none;margin-bottom:7px}
+.ann-edit-form input[type=text]:focus{border-color:var(--accent)}
+.ann-color-row{display:flex;gap:4px;margin-bottom:7px;flex-wrap:wrap}
+.ann-color-chip{width:18px;height:18px;border-radius:3px;cursor:pointer;border:2px solid transparent;transition:all .12s}
+.ann-color-chip:hover,.ann-color-chip.sel{border-color:#fff;transform:scale(1.15)}
+.ann-arrow-row{display:flex;gap:3px;margin-bottom:8px}
+.ann-arrow-btn{flex:1;padding:3px 4px;font-size:10px;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .12s;text-align:center}
+.ann-arrow-btn:hover{border-color:var(--accent);color:var(--text)}
+.ann-arrow-btn.sel{background:var(--accent);border-color:var(--accent);color:#fff}
+.ann-form-btns{display:flex;gap:4px}
+.ann-save{flex:1;padding:5px;background:var(--accent);border:none;border-radius:4px;color:#fff;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.ann-save:hover{background:#6d28d9}
+.ann-cancel{flex:0;padding:5px 10px;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--muted);font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s}
+.ann-cancel:hover{color:var(--text)}
+
+/* Export bar */
+.export-bar{border-top:1px solid var(--border);padding:10px;display:flex;gap:5px;flex-shrink:0}
+.xbtn{flex:1;padding:6px;border:1px solid var(--border2);border-radius:5px;font-size:11px;font-weight:500;color:var(--text);background:var(--surface2);cursor:pointer;font-family:inherit;transition:all .15s;text-align:center}
+.xbtn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ── Title editor (sidebar) ── */
+.title-input{width:100%;padding:6px 9px;background:var(--bg);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-family:inherit;outline:none;transition:border-color .15s;resize:none}
+.title-input:focus{border-color:var(--accent)}
+#sideTitle{font-size:14px;font-weight:600}
+#sideSub{font-size:12px;color:var(--muted);margin-top:5px}
+.title-meta-row{display:flex;gap:4px;margin-top:6px}
+.title-meta-row select{flex:1;font-size:10px;padding:4px 20px 4px 6px}
+
+/* ── Canvas ── */
+.canvas{flex:1;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.chart-wrap{flex:1;position:relative;overflow:hidden}
+.chart-wrap{flex:1;position:relative;overflow:hidden}
+#viz{width:100%;height:100%;cursor:default}
+#viz.annotating{cursor:crosshair}
+#viz.annotating .bar-hit, #viz.annotating .lolly-hit, #viz.annotating .bubble-hit{cursor:pointer}
+
+/* Tooltip */
+#tip{position:fixed;pointer-events:none;background:var(--panel);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;font-size:11px;opacity:0;transition:opacity .12s;z-index:200;max-width:200px;box-shadow:0 4px 20px rgba(0,0,0,.6)}
+#tip.on{opacity:1}
+#tip img.card-img{width:80px;height:111px;object-fit:contain;display:block;margin:0 auto 7px;border-radius:3px}
+#tip .tname{font-weight:600;color:var(--text);margin-bottom:2px}
+#tip .tset{font-size:9px;color:var(--muted);margin-bottom:5px}
+#tip .trow{display:flex;justify-content:space-between;font-size:10px;padding:2px 0;border-top:1px solid var(--border)}
+#tip .tlbl{color:var(--muted)}
+#tip .tval{color:var(--gold);font-weight:600}
+
+/* Annotation inline SVG popup */
+.ann-popup{position:absolute;background:var(--panel);border:1px solid var(--gold);border-radius:8px;padding:10px;z-index:100;min-width:200px;box-shadow:0 4px 20px rgba(0,0,0,.7)}
+.ann-popup input{width:100%;padding:5px 8px;background:var(--bg);border:1px solid var(--border2);border-radius:4px;color:var(--text);font-size:12px;font-family:inherit;outline:none;margin-bottom:7px}
+.ann-popup input:focus{border-color:var(--gold)}
+
+/* Status bar */
+.status{height:26px;border-top:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:12px;font-size:10px;color:var(--muted);flex-shrink:0;background:var(--panel)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;margin-right:4px}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo">✦ Eeveelution Card Values</span>
+  <span style="font-size:11px;color:var(--muted)">Max PSA 10 price per evolution</span>
+  <div class="spacer"></div>
+  <button class="hbtn" id="replayBtn">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>Replay
+  </button>
+  <button class="hbtn" id="annModeBtn">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Add Annotation
+  </button>
+</header>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-scroll">
+
+      <!-- Title & Subtitle -->
+      <div class="ctrl-section">
+        <div class="ctrl-label">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+          Title &amp; Subtitle
+        </div>
+        <input class="title-input" type="text" id="sideTitle" value="Eeveelution Card Values" placeholder="Chart title…" autocomplete="off">
+        <input class="title-input" type="text" id="sideSub" value="Max PSA 10 price per Eeveelution · Pokémon TCG" placeholder="Subtitle…" autocomplete="off" style="margin-top:5px;font-size:11px;color:var(--muted)">
+        <div class="title-meta-row">
+          <select id="titleAlign">
+            <option value="left">Left</option>
+            <option value="center" selected>Center</option>
+            <option value="right">Right</option>
+          </select>
+          <select id="titleSize">
+            <option value="16">Small</option>
+            <option value="20" selected>Medium</option>
+            <option value="26">Large</option>
+          </select>
+        </div>
+      </div>
+      <div class="divider" style="margin-top:0"></div>
+
+      <!-- Chart Type -->
+      <div class="ctrl-section">
+        <div class="ctrl-label">Chart Type</div>
+        <div class="btn-group" style="margin-bottom:4px">
+          <button class="btn active" data-chart="bar">Bar</button>
+          <button class="btn" data-chart="lollipop">Lollipop</button>
+          <button class="btn" data-chart="bubble">Bubble</button>
+          <button class="btn" data-chart="slope">Slope</button>
+        </div>
+        <div class="btn-group" id="orientRow">
+          <button class="btn active" data-orient="vertical">↕ Vertical</button>
+          <button class="btn" data-orient="horizontal">↔ Horiz.</button>
+        </div>
+      </div>
+
+      <!-- Price Metric -->
+      <div class="ctrl-section">
+        <div class="ctrl-label">Price Metric</div>
+        <div class="radio-group">
+          <label class="radio-opt active"><input type="radio" name="metric" value="p10" checked><div class="rdot"></div><span>PSA 10</span></label>
+          <label class="radio-opt"><input type="radio" name="metric" value="p9"><div class="rdot"></div><span>Grade 9</span></label>
+          <label class="radio-opt"><input type="radio" name="metric" value="pu"><div class="rdot"></div><span>Ungraded</span></label>
+        </div>
+      </div>
+
+      <!-- Scale & Sort -->
+      <div class="ctrl-section">
+        <div class="ctrl-label">Y Scale</div>
+        <div class="btn-group" style="margin-bottom:8px">
+          <button class="btn active" data-scale="log">Log</button>
+          <button class="btn" data-scale="linear">Linear</button>
+        </div>
+        <div class="ctrl-label">Sort</div>
+        <select id="sortBy">
+          <option value="price">By price ↓</option>
+          <option value="alpha">Alphabetical</option>
+          <option value="type">By type</option>
+        </select>
+      </div>
+
+      <!-- Visual -->
+      <div class="ctrl-section">
+        <div class="ctrl-label">Color Mode</div>
+        <div class="btn-group" style="margin-bottom:8px">
+          <button class="btn active" data-color="type">Type</button>
+          <button class="btn" data-color="heat">Heat</button>
+          <button class="btn" data-color="mono">Mono</button>
+        </div>
+        <div class="ctrl-label">Bar Radius</div>
+        <div class="slider-row"><span>Square</span><span class="sval" id="rxVal">4</span></div>
+        <input type="range" id="rxSlider" min="0" max="20" value="4">
+        <div class="ctrl-label" style="margin-top:8px">Pokémon Art Size</div>
+        <div class="slider-row"><span>Small</span><span class="sval" id="imgSzVal">70</span></div>
+        <input type="range" id="imgSzSlider" min="30" max="110" value="70">
+      </div>
+
+      <!-- Show/Hide -->
+      <div class="ctrl-section">
+        <div class="ctrl-label">Visibility</div>
+        <div class="tog-row"><span>Pokémon Art</span><label class="tog"><input type="checkbox" id="togArt" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></div>
+        <div class="tog-row"><span>Value Labels</span><label class="tog"><input type="checkbox" id="togLabels" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></div>
+        <div class="tog-row"><span>Card on Hover</span><label class="tog"><input type="checkbox" id="togCard" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></div>
+        <div class="tog-row"><span>Grid Lines</span><label class="tog"><input type="checkbox" id="togGrid" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></div>
+        <div class="tog-row"><span>Annotations</span><label class="tog"><input type="checkbox" id="togAnn" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></div>
+        <div class="tog-row"><span>Dark Background</span><label class="tog"><input type="checkbox" id="togDark" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></div>
+      </div>
+
+      <!-- Annotations -->
+      <div class="divider"></div>
+      <div class="ctrl-section">
+        <div class="ctrl-label">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Annotations
+        </div>
+        <button class="ann-add-btn" id="annAddBtn">+ Click chart to annotate</button>
+        <div id="annList"></div>
+      </div>
+
+      <!-- Animation -->
+      <div class="divider"></div>
+      <div class="ctrl-section">
+        <div class="ctrl-label">Animation</div>
+        <div class="speed-row">
+          <button class="speed-btn" data-speed="slow">Slow</button>
+          <button class="speed-btn active" data-speed="medium">Med</button>
+          <button class="speed-btn" data-speed="fast">Fast</button>
+        </div>
+        <div style="margin-top:7px">
+          <div class="tog-row"><span>Stagger</span><label class="tog"><input type="checkbox" id="togStagger" checked><div class="tog-track"></div><div class="tog-thumb"></div></label></div>
+        </div>
+      </div>
+
+    </div><!-- /sidebar-scroll -->
+    <div class="export-bar">
+      <button class="xbtn" id="btnSVG">SVG</button>
+      <button class="xbtn" id="btnPNG">PNG</button>
+    </div>
+  </aside>
+
+  <main class="canvas">
+    <div class="chart-wrap">
+      <svg id="viz"></svg>
+      <!-- annotation popup injected here by JS -->
+    </div>
+    <div class="status"><span class="status-dot"></span><span id="statusTxt">9 Eeveelutions · PSA 10</span></div>
+  </main>
+</div>
+
+<div id="tip"></div>
+
+<script>
+// ── Data ─────────────────────────────────────────────────────────────────────
+const DATA = [
+  {sp:'Eevee',   p10:24999,   p9:1204.30, pu:288.38,  card:"Eevee [Reverse Holo] #74",     set:"Legendary Collection", cardImg:"https://storage.googleapis.com/images.pricecharting.com/f6b136b6be606737b833a35d",   pokeId:133, type:'normal'},
+  {sp:'Vaporeon',p10:4445.62, p9:1218.57, pu:291.17,  card:"Vaporeon #H31",                 set:"Skyridge",             cardImg:"https://storage.googleapis.com/images.pricecharting.com/488b1b8784ef4025b73962e7",   pokeId:134, type:'water'},
+  {sp:'Jolteon', p10:5000,    p9:711.20,  pu:243.39,  card:"Jolteon [Reverse Holo] #14",    set:"Legendary Collection", cardImg:"https://storage.googleapis.com/images.pricecharting.com/55df97214003f68309666040",   pokeId:135, type:'electric'},
+  {sp:'Flareon', p10:4456.25, p9:1063.54, pu:330.38,  card:"Flareon [Reverse Holo] #10",    set:"Legendary Collection", cardImg:"https://storage.googleapis.com/images.pricecharting.com/05560483cc1323b110acfdd9",   pokeId:136, type:'fire'},
+  {sp:'Espeon',  p10:9999.99, p9:1432.63, pu:305.71,  card:"Dark Espeon [1st Edition] #4",  set:"Neo Destiny",          cardImg:"https://storage.googleapis.com/images.pricecharting.com/d4bdef4346970218011c5e4e",   pokeId:196, type:'psychic'},
+  {sp:'Umbreon', p10:20418.78,p9:5745.92, pu:1545.06, card:"Umbreon #H30",                   set:"Skyridge",             cardImg:"https://storage.googleapis.com/images.pricecharting.com/23d5174bf14b858079ee4226",   pokeId:197, type:'dark'},
+  {sp:'Leafeon', p10:560,     p9:183.19,  pu:39,      card:"Leafeon #BW87",                  set:"Promo",                cardImg:"https://storage.googleapis.com/images.pricecharting.com/f07646dbe1dcaac1dd4a7aea",   pokeId:470, type:'grass'},
+  {sp:'Glaceon', p10:8999.95, p9:150,     pu:199.99,  card:"Glaceon #BW90",                  set:"Promo",                cardImg:"https://storage.googleapis.com/images.pricecharting.com/4fe7e74eb480f2f75ba8d97e",   pokeId:471, type:'ice'},
+  {sp:'Sylveon', p10:1900,    p9:182.50,  pu:18.07,   card:"Sylveon #XY04",                  set:"Promo",                cardImg:"https://storage.googleapis.com/images.pricecharting.com/13e919724cface380857efc9",   pokeId:700, type:'fairy'},
+];
+
+const TYPE_COLORS = {
+  normal:'#A8A878', water:'#6890F0', electric:'#F8D030', fire:'#F08030',
+  psychic:'#F85888', dark:'#705848', grass:'#78C850', ice:'#98D8D8', fairy:'#EE99AC'
+};
+const POKE_ART = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+const TYPE_ORDER = ['normal','water','electric','fire','psychic','dark','grass','ice','fairy'];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+const S = {
+  chart:'bar', orient:'vertical', metric:'p10', scale:'log',
+  sort:'price', colorMode:'type', rx:4, imgSz:70,
+  showArt:true, showLabels:true, showCard:true, showGrid:true, showAnn:true,
+  dark:true, stagger:true, speed:'medium',
+  title:'Eeveelution Card Values',
+  subtitle:'Max PSA 10 price per Eeveelution · Pokémon TCG',
+  titleAlign:'center', titleSize:20,
+  annotations: [],
+  annotating: false,
+  selectedAnn: null,
+  editingAnn: null
+};
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function gm(d) { return d[S.metric]; }
+function fmt(v) {
+  if (v>=1e6) return '$'+(v/1e6).toFixed(2)+'M';
+  if (v>=1e3) return '$'+(v/1e3).toFixed(1)+'k';
+  return '$'+Math.round(v).toLocaleString();
+}
+const SPEEDS = {slow:1200, medium:600, fast:250};
+function dur() { return SPEEDS[S.speed]; }
+function delay(i) { return S.stagger ? i * (dur()*0.1) : 0; }
+
+function sortedData() {
+  const d = [...DATA];
+  if (S.sort==='price')  return d.sort((a,b) => gm(b)-gm(a));
+  if (S.sort==='alpha')  return d.sort((a,b) => a.sp.localeCompare(b.sp));
+  if (S.sort==='type')   return d.sort((a,b) => TYPE_ORDER.indexOf(a.type)-TYPE_ORDER.indexOf(b.type));
+  return d;
+}
+
+function getColor(d, i, n) {
+  if (S.colorMode==='type') return TYPE_COLORS[d.type];
+  if (S.colorMode==='heat') return d3.interpolatePlasma(1 - i/n);
+  return '#7c3aed';
+}
+
+// ── SVG + defs setup ──────────────────────────────────────────────────────────
+const svgEl = document.getElementById('viz');
+const svg   = d3.select('#viz');
+let svgDefs = svg.append('defs');
+
+// ── Title inside SVG ─────────────────────────────────────────────────────────
+function drawSVGTitle(W) {
+  if (!S.title && !S.subtitle) return 0;
+  const tg = svg.append('g').attr('class','layer').attr('id','title-layer');
+  const hasTitle = S.title.trim().length > 0;
+  const hasSub   = S.subtitle.trim().length > 0;
+  const ax = S.titleAlign==='center' ? W/2 : S.titleAlign==='right' ? W-20 : 20;
+  const anchor = S.titleAlign==='center' ? 'middle' : S.titleAlign==='right' ? 'end' : 'start';
+  let y = 0;
+
+  if (hasTitle) {
+    y += S.titleSize + 4;
+    tg.append('text')
+      .attr('x', ax).attr('y', y)
+      .attr('text-anchor', anchor)
+      .attr('font-family', "'Space Grotesk', sans-serif")
+      .attr('font-size', S.titleSize + 'px')
+      .attr('font-weight', '700')
+      .attr('fill', S.dark ? '#e2e8f0' : '#1e293b')
+      .text(S.title);
+  }
+  if (hasSub) {
+    y += Math.round(S.titleSize * 0.72) + 4;
+    tg.append('text')
+      .attr('x', ax).attr('y', y)
+      .attr('text-anchor', anchor)
+      .attr('font-family', "'Inter', sans-serif")
+      .attr('font-size', Math.round(S.titleSize * 0.62) + 'px')
+      .attr('fill', S.dark ? '#5a6a82' : '#94a3b8')
+      .text(S.subtitle);
+  }
+  return y + 14; // vertical space consumed
+}
+
+// ── Main render ───────────────────────────────────────────────────────────────
+function render() {
+  const W = svgEl.clientWidth, H = svgEl.clientHeight;
+  if (!W||!H) return;
+  svg.selectAll('.layer').remove();
+  svg.style('background', S.dark ? '#09090f' : '#f8fafc');
+  svgDefs.selectAll('*').remove();
+
+  const titleH = drawSVGTitle(W);
+  const data = sortedData();
+  const chart = S.chart;
+  const chartH = H - titleH;
+
+  if (chart==='bar')          drawBar(data, W, chartH, titleH);
+  else if(chart==='lollipop') drawLollipop(data, W, chartH, titleH);
+  else if(chart==='bubble')   drawBubble(data, W, chartH, titleH);
+  else if(chart==='slope')    drawSlope(data, W, chartH, titleH);
+
+  document.getElementById('statusTxt').textContent =
+    `${data.length} Eeveelutions · ${S.metric==='p10'?'PSA 10':S.metric==='p9'?'Grade 9':'Ungraded'} · ${S.chart}`;
+}
+
+// ── Bar Chart ─────────────────────────────────────────────────────────────────
+function drawBar(data, W, H, offY=0) {
+  const vert = S.orient==='vertical';
+  const imgPad = S.showArt ? S.imgSz + 12 : 20;
+  const M = vert
+    ? {top: imgPad, right:30, bottom:64, left:70}
+    : {top:16, right:110, bottom:28, left:100};
+  const _g_offset = offY;
+  const iW = W-M.left-M.right, iH = H-M.top-M.bottom;
+
+  const vals = data.map(gm).filter(v=>v>0);
+  const maxV = d3.max(vals)*1.18;
+  const minV = S.scale==='log' ? Math.max(1, d3.min(vals)*0.5) : 0;
+
+  const makeY = () => (S.scale==='log' ? d3.scaleLog() : d3.scaleLinear())
+    .domain([minV, maxV]).range(vert ? [iH,0] : [0,iW]).nice();
+  const bandDomain = data.map(d=>d.sp);
+
+  const xS = vert
+    ? d3.scaleBand().domain(bandDomain).range([0,iW]).padding(0.28)
+    : makeY();
+  const yS = vert ? makeY() : d3.scaleBand().domain(bandDomain).range([0,iH]).padding(0.28);
+
+  const g = svg.append('g').attr('class','layer').attr('transform',`translate(${M.left},${M.top + _g_offset})`);
+
+  // Grid
+  if (S.showGrid) {
+    const gridVals = (vert ? yS : xS).ticks ? (vert ? yS : xS).ticks(6) : [];
+    gridVals.forEach(t => {
+      g.append('line')
+        .attr('x1', vert?0:xS(t)).attr('x2', vert?iW:xS(t))
+        .attr('y1', vert?yS(t):0).attr('y2', vert?yS(t):iH)
+        .attr('stroke', S.dark?'#1c1c2e':'#e2e8f0').attr('stroke-dasharray','3,3');
+    });
+  }
+
+  // Bars
+  data.forEach((d,i) => {
+    const v = gm(d); if(!v) return;
+    const col = getColor(d,i,data.length);
+
+    // gradient def per bar
+    const gid = `bgrad-${i}`;
+    const grd = svgDefs.append('linearGradient').attr('id',gid)
+      .attr('x1','0').attr('y1','0').attr('x2', vert?'0':'1').attr('y2', vert?'1':'0');
+    grd.append('stop').attr('offset','0%').attr('stop-color', d3.color(col).brighter(.5).toString());
+    grd.append('stop').attr('offset','100%').attr('stop-color', d3.color(col).darker(.5).toString());
+
+    const bx = vert ? xS(d.sp) : 0;
+    const bw = vert ? xS.bandwidth() : 0;
+    const by = vert ? iH : yS(d.sp);
+    const bh = vert ? 0  : yS.bandwidth();
+
+    const bar = g.append('rect').attr('class','bar-hit')
+      .attr('x', bx).attr('y', by)
+      .attr('width', vert?bw:0).attr('height', vert?0:bh)
+      .attr('fill', `url(#${gid})`).attr('rx', S.rx)
+      .style('cursor','pointer');
+
+    bar.transition().duration(dur()).delay(delay(i)).ease(d3.easeCubicOut)
+      .attr('y',      vert ? yS(v) : by)
+      .attr('height', vert ? iH - yS(v) : bh)
+      .attr('width',  vert ? bw : xS(v));
+
+    bar.on('mouseover', e => {
+        d3.select(bar.node()).attr('filter','brightness(1.2)');
+        showTip(e, d);
+      })
+      .on('mousemove', e => moveTip(e))
+      .on('mouseout', () => { d3.select(bar.node()).attr('filter',null); hideTip(); })
+      .on('click', e => { if(S.annotating) placeAnnotation(e, d, g, vert?xS(d.sp)+xS.bandwidth()/2:xS(v), vert?yS(v):yS(d.sp)+yS.bandwidth()/2); });
+  });
+
+  // Value labels
+  if (S.showLabels) {
+    data.forEach((d,i) => {
+      const v = gm(d); if(!v) return;
+      const lx = vert ? xS(d.sp)+xS.bandwidth()/2 : xS(v)+5;
+      const ly = vert ? yS(v)-7 : yS(d.sp)+yS.bandwidth()/2+4;
+      g.append('text').attr('x',lx).attr('y',ly).attr('opacity',0)
+        .attr('text-anchor', vert?'middle':'start')
+        .attr('fill', S.dark?'#94a3b8':'#475569').attr('font-size','11px').attr('font-weight','600')
+        .text(fmt(v))
+        .transition().delay(delay(i)+dur()*.7).duration(250).attr('opacity',1);
+    });
+  }
+
+  // Pokemon art
+  if (S.showArt) {
+    data.forEach((d,i) => {
+      const v = gm(d); if(!v||!vert) return;
+      const cx = xS(d.sp)+xS.bandwidth()/2;
+      const ty = yS(v) - S.imgSz - 10;
+      const img = g.append('image')
+        .attr('href', POKE_ART(d.pokeId))
+        .attr('x', cx - S.imgSz/2).attr('y', ty)
+        .attr('width', S.imgSz).attr('height', S.imgSz)
+        .attr('opacity',0).style('pointer-events','none');
+      img.transition().delay(delay(i)+dur()*.5).duration(300).attr('opacity',1);
+    });
+  }
+
+  // Axes
+  const xAxis = vert
+    ? d3.axisBottom(xS).tickSize(0)
+    : d3.axisLeft(xS).tickSize(0);
+  const yAxis = vert
+    ? d3.axisLeft(yS).ticks(S.scale==='log'?8:6).tickFormat(fmt)
+    : d3.axisBottom(yS).ticks(5).tickFormat(fmt);
+
+  g.append('g').attr('transform', vert?`translate(0,${iH})`:`translate(0,${iH})`)
+    .call(xAxis)
+    .call(ax => {
+      ax.select('.domain').remove();
+      ax.selectAll('text').attr('fill',S.dark?'#94a3b8':'#475569').attr('font-size','11px');
+      if(vert) ax.selectAll('text').attr('dy','1.2em');
+    });
+
+  g.append('g').call(yAxis)
+    .call(ax => {
+      ax.select('.domain').attr('stroke',S.dark?'#252540':'#cbd5e1');
+      ax.selectAll('text').attr('fill',S.dark?'#64748b':'#94a3b8').attr('font-size','10px');
+      ax.selectAll('line').attr('stroke','none');
+    });
+
+  drawAnnotations(g, data, (d) => vert?xS(d.sp)+xS.bandwidth()/2:xS(gm(d)), (d) => vert?yS(gm(d)):yS(d.sp)+yS.bandwidth()/2);
+}
+
+// ── Lollipop ──────────────────────────────────────────────────────────────────
+function drawLollipop(data, W, H, offY=0) {
+  const vert = S.orient==='vertical';
+  const imgPad = S.showArt ? S.imgSz + 12 : 20;
+  const M = vert ? {top:imgPad,right:30,bottom:64,left:70} : {top:16,right:110,bottom:28,left:100};
+  const iW = W-M.left-M.right, iH = H-M.top-M.bottom;
+
+  const vals = data.map(gm).filter(v=>v>0);
+  const maxV = d3.max(vals)*1.18, minV = S.scale==='log'?Math.max(1,d3.min(vals)*.5):0;
+  const makeY = () => (S.scale==='log'?d3.scaleLog():d3.scaleLinear()).domain([minV,maxV]).range(vert?[iH,0]:[0,iW]).nice();
+  const xS = vert ? d3.scaleBand().domain(data.map(d=>d.sp)).range([0,iW]).padding(.3) : makeY();
+  const yS = vert ? makeY() : d3.scaleBand().domain(data.map(d=>d.sp)).range([0,iH]).padding(.3);
+  const g = svg.append('g').attr('class','layer').attr('transform',`translate(${M.left},${M.top+offY})`);
+
+  if (S.showGrid) {
+    (vert?yS:xS).ticks?.(6).forEach(t=>{
+      g.append('line')
+        .attr('x1',vert?0:xS(t)).attr('x2',vert?iW:xS(t))
+        .attr('y1',vert?yS(t):0).attr('y2',vert?yS(t):iH)
+        .attr('stroke',S.dark?'#1c1c2e':'#e2e8f0').attr('stroke-dasharray','3,3');
+    });
+  }
+
+  data.forEach((d,i) => {
+    const v = gm(d); if(!v) return;
+    const col = getColor(d,i,data.length);
+    const cx = vert ? xS(d.sp)+xS.bandwidth()/2 : 0;
+    const cy = vert ? iH : yS(d.sp)+yS.bandwidth()/2;
+    const tx = vert ? cx : xS(v);
+    const ty = vert ? yS(v) : cy;
+
+    // Stem
+    g.append('line').attr('class','lolly-stem')
+      .attr('x1',cx).attr('y1',cy).attr('x2',cx).attr('y2',cy)
+      .attr('stroke',col).attr('stroke-width',2.5).attr('opacity',.7)
+      .transition().duration(dur()).delay(delay(i)).ease(d3.easeCubicOut)
+      .attr('x2',tx).attr('y2',ty);
+
+    // Circle
+    const circle = g.append('circle').attr('class','lolly-hit')
+      .attr('cx',cx).attr('cy',cy).attr('r',0)
+      .attr('fill',col).attr('stroke',S.dark?'#09090f':'#fff').attr('stroke-width',2)
+      .style('cursor','pointer');
+    circle.transition().duration(200).delay(delay(i)+dur()*.8).ease(d3.easeBackOut.overshoot(1.3)).attr('cx',tx).attr('cy',ty).attr('r',9);
+    circle.on('mouseover',e=>{d3.select(circle.node()).attr('r',12);showTip(e,d);})
+      .on('mousemove',e=>moveTip(e)).on('mouseout',()=>{d3.select(circle.node()).attr('r',9);hideTip();})
+      .on('click',e=>{if(S.annotating)placeAnnotation(e,d,g,tx,ty);});
+
+    if (S.showLabels) {
+      g.append('text').attr('x',vert?tx:tx+6).attr('y',vert?ty-14:ty+4)
+        .attr('text-anchor',vert?'middle':'start')
+        .attr('fill',S.dark?'#94a3b8':'#475569').attr('font-size','10px').attr('font-weight','600')
+        .attr('opacity',0).text(fmt(v))
+        .transition().delay(delay(i)+dur()).duration(250).attr('opacity',1);
+    }
+
+    if (S.showArt && vert) {
+      g.append('image').attr('href',POKE_ART(d.pokeId))
+        .attr('x',tx-S.imgSz/2).attr('y',ty-S.imgSz-16)
+        .attr('width',S.imgSz).attr('height',S.imgSz).attr('opacity',0).style('pointer-events','none')
+        .transition().delay(delay(i)+dur()*.6).duration(300).attr('opacity',1);
+    }
+  });
+
+  const xAxis = vert?d3.axisBottom(xS).tickSize(0):d3.axisLeft(xS).tickSize(0);
+  const yAxis = vert?d3.axisLeft(yS).ticks(S.scale==='log'?8:6).tickFormat(fmt):d3.axisBottom(yS).ticks(5).tickFormat(fmt);
+  g.append('g').attr('transform',vert?`translate(0,${iH})`:`translate(0,${iH})`).call(xAxis)
+    .call(ax=>{ax.select('.domain').remove();ax.selectAll('text').attr('fill',S.dark?'#94a3b8':'#475569').attr('font-size','11px');});
+  g.append('g').call(yAxis)
+    .call(ax=>{ax.select('.domain').attr('stroke',S.dark?'#252540':'#cbd5e1');ax.selectAll('text').attr('fill',S.dark?'#64748b':'#94a3b8').attr('font-size','10px');ax.selectAll('line').attr('stroke','none');});
+
+  drawAnnotations(g, data, (d)=>vert?xS(d.sp)+xS.bandwidth()/2:xS(gm(d)), (d)=>vert?yS(gm(d)):yS(d.sp)+yS.bandwidth()/2);
+}
+
+// ── Bubble ────────────────────────────────────────────────────────────────────
+function drawBubble(data, W, H, offY=0) {
+  const vals = data.map(gm).filter(v=>v>0);
+  const rScale = d3.scaleSqrt().domain([0,d3.max(vals)]).range([20,Math.min(W,H-offY)/4.5]);
+  const nodes = data.map((d,i) => ({...d, _r: d[S.metric]>0?rScale(d[S.metric]):20, _i:i}));
+
+  const sim = d3.forceSimulation(nodes)
+    .force('center', d3.forceCenter(W/2, offY + (H-offY)/2))
+    .force('charge', d3.forceManyBody().strength(-6))
+    .force('collide', d3.forceCollide(d=>d._r+4))
+    .stop();
+  for(let i=0;i<280;i++) sim.tick();
+  nodes.forEach(d=>{d.x=Math.max(d._r+8,Math.min(W-d._r-8,d.x));d.y=Math.max(d._r+8+offY,Math.min(H-d._r-8,d.y));});
+
+  const g = svg.append('g').attr('class','layer');
+
+  nodes.forEach((d,i)=>{
+    const r = d._r;
+    const col = getColor(d,i,data.length);
+    const c = d3.color(col);
+    const gid = `bub-${i}`;
+    const gr = svgDefs.append('radialGradient').attr('id',gid).attr('cx','35%').attr('cy','30%').attr('r','65%');
+    gr.append('stop').attr('offset','0%').attr('stop-color',c.brighter(2).toString()).attr('stop-opacity',.9);
+    gr.append('stop').attr('offset','55%').attr('stop-color',col);
+    gr.append('stop').attr('offset','100%').attr('stop-color',c.darker(1.8).toString());
+
+    const bg = g.append('g').attr('transform',`translate(${d.x},${d.y})`).style('cursor','pointer');
+    bg.append('ellipse').attr('cx',r*.08).attr('cy',r*.32).attr('rx',r*.65).attr('ry',r*.22)
+      .attr('fill','rgba(0,0,0,.3)').style('filter',`blur(${r*.18}px)`);
+    const circle = bg.append('circle').attr('r',0).attr('fill',`url(#${gid})`).attr('class','bubble-hit')
+      .attr('stroke',c.darker(.4).toString()).attr('stroke-width',.5);
+    circle.transition().duration(dur()).delay(delay(i)).ease(d3.easeBackOut.overshoot(1.1)).attr('r',r);
+    bg.append('circle').attr('cx',-r*.22).attr('cy',-r*.22).attr('r',r*.16)
+      .attr('fill','rgba(255,255,255,.28)').style('filter',`blur(${r*.1}px)`).attr('pointer-events','none');
+
+    if (S.showArt && r>28) {
+      const is = Math.min(r*1.2, S.imgSz);
+      bg.append('image').attr('href',POKE_ART(d.pokeId))
+        .attr('x',-is/2).attr('y',-is/2-.3*r).attr('width',is).attr('height',is)
+        .attr('opacity',0).attr('pointer-events','none')
+        .transition().delay(delay(i)+dur()*.5).duration(300).attr('opacity',.9);
+    }
+
+    if (r>22) {
+      bg.append('text').attr('text-anchor','middle').attr('dy',r*.6+12+'px')
+        .attr('fill','rgba(255,255,255,.85)').attr('font-size',Math.max(9,Math.min(r*.28,13))+'px')
+        .attr('font-weight','600').attr('pointer-events','none').text(d.sp);
+    }
+
+    bg.on('mouseover',e=>showTip(e,d)).on('mousemove',e=>moveTip(e)).on('mouseout',hideTip)
+      .on('click',e=>{if(S.annotating)placeAnnotation(e,d,g,d.x,d.y);});
+  });
+
+  drawAnnotations(g, data, d=>{const n=nodes.find(n=>n.sp===d.sp);return n?n.x:0;}, d=>{const n=nodes.find(n=>n.sp===d.sp);return n?n.y:0;});
+}
+
+// ── Slope ─────────────────────────────────────────────────────────────────────
+function drawSlope(data, W, H, offY=0) {
+  const M = {top:20, right:80, bottom:50, left:80};
+  const iW = W-M.left-M.right, iH = H-M.top-M.bottom;
+  const cols = [{key:'pu',label:'Ungraded'},{key:'p9',label:'Grade 9'},{key:'p10',label:'PSA 10'}];
+
+  const allVals = data.flatMap(d=>[d.pu,d.p9,d.p10]).filter(v=>v>0);
+  const yS = (S.scale==='log'?d3.scaleLog():d3.scaleLinear())
+    .domain([S.scale==='log'?Math.max(1,d3.min(allVals)*.5):0, d3.max(allVals)*1.15])
+    .range([iH,0]).nice();
+  const xS = d3.scalePoint().domain(cols.map(c=>c.label)).range([0,iW]).padding(.3);
+  const g = svg.append('g').attr('class','layer').attr('transform',`translate(${M.left},${M.top+offY})`);
+
+  if (S.showGrid) {
+    yS.ticks?.(6).forEach(t=>{
+      g.append('line').attr('x1',0).attr('x2',iW).attr('y1',yS(t)).attr('y2',yS(t))
+        .attr('stroke',S.dark?'#1c1c2e':'#e2e8f0').attr('stroke-dasharray','3,3');
+    });
+  }
+
+  // Column headers
+  cols.forEach(c=>{
+    g.append('text').attr('x',xS(c.label)).attr('y',-6).attr('text-anchor','middle')
+      .attr('fill',S.dark?'#64748b':'#94a3b8').attr('font-size','12px').attr('font-weight','600').text(c.label);
+  });
+
+  // Lines + dots per species
+  data.forEach((d,i)=>{
+    const col = getColor(d,i,data.length);
+    const points = cols.map(c=>({label:c.label, v:d[c.key], x:xS(c.label), y:yS(Math.max(1,d[c.key]))})).filter(p=>p.v>0);
+    if(points.length<2) return;
+
+    const lineGen = d3.line().x(p=>p.x).y(p=>p.y).curve(d3.curveMonotoneX);
+    const path = g.append('path').datum(points).attr('fill','none')
+      .attr('stroke',col).attr('stroke-width',2.5).attr('opacity',.85).attr('d',lineGen);
+    const len = path.node().getTotalLength();
+    path.attr('stroke-dasharray',len).attr('stroke-dashoffset',len)
+      .transition().duration(dur()).delay(delay(i)).ease(d3.easeLinear).attr('stroke-dashoffset',0);
+
+    points.forEach((p,pi)=>{
+      g.append('circle').attr('cx',p.x).attr('cy',p.y).attr('r',0)
+        .attr('fill',col).attr('stroke',S.dark?'#09090f':'#fff').attr('stroke-width',1.5)
+        .transition().duration(180).delay(delay(i)+dur()*.8+pi*60).ease(d3.easeBackOut).attr('r',6);
+    });
+
+    // Label at PSA10 end
+    if (S.showLabels) {
+      const last = points[points.length-1];
+      g.append('text').attr('x',last.x+10).attr('y',last.y+4)
+        .attr('fill',col).attr('font-size','10px').attr('font-weight','600')
+        .attr('opacity',0).text(d.sp)
+        .transition().delay(delay(i)+dur()).duration(250).attr('opacity',1);
+    }
+
+    // Art at PSA10
+    if (S.showArt) {
+      const last = points[points.length-1];
+      const is = Math.min(S.imgSz, 52);
+      g.append('image').attr('href',POKE_ART(d.pokeId))
+        .attr('x',last.x-is/2).attr('y',last.y-is-8)
+        .attr('width',is).attr('height',is).attr('opacity',0).style('pointer-events','none')
+        .transition().delay(delay(i)+dur()).duration(300).attr('opacity',1);
+    }
+  });
+
+  // Axes
+  g.append('g').attr('transform',`translate(0,${iH})`)
+    .call(d3.axisBottom(xS).tickSize(0))
+    .call(ax=>{ax.select('.domain').remove();ax.selectAll('text').attr('fill',S.dark?'#94a3b8':'#475569').attr('font-size','11px');});
+  g.append('g').call(d3.axisLeft(yS).ticks(S.scale==='log'?8:6).tickFormat(fmt))
+    .call(ax=>{ax.select('.domain').attr('stroke',S.dark?'#252540':'#cbd5e1');ax.selectAll('text').attr('fill',S.dark?'#64748b':'#94a3b8').attr('font-size','10px');ax.selectAll('line').attr('stroke','none');});
+
+  drawAnnotations(g, data, d=>{const p=xS('PSA 10');return p;}, d=>yS(Math.max(1,d.p10)));
+}
+
+// ── Tooltip ───────────────────────────────────────────────────────────────────
+const tip = document.getElementById('tip');
+function showTip(e, d) {
+  const cardHtml = S.showCard ? `<img class="card-img" src="${d.cardImg}" alt="" onerror="this.style.display='none'">` : '';
+  tip.innerHTML = `${cardHtml}
+    <div class="tname">${d.sp}</div>
+    <div class="tset">${d.card}<br>${d.set}</div>
+    <div class="trow"><span class="tlbl">PSA 10</span><span class="tval">${fmt(d.p10)}</span></div>
+    <div class="trow"><span class="tlbl">Grade 9</span><span class="tval">${fmt(d.p9)}</span></div>
+    <div class="trow"><span class="tlbl">Ungraded</span><span class="tval">${fmt(d.pu)}</span></div>`;
+  tip.classList.add('on');
+  moveTip(e);
+}
+function moveTip(e){
+  const tw=200,th=tip.offsetHeight,vw=window.innerWidth,vh=window.innerHeight;
+  tip.style.left=(e.clientX+16+tw>vw?e.clientX-tw-10:e.clientX+16)+'px';
+  tip.style.top=(e.clientY+th>vh?e.clientY-th:e.clientY)+'px';
+}
+function hideTip(){ tip.classList.remove('on'); }
+
+// ── Annotations ───────────────────────────────────────────────────────────────
+const ANN_COLORS = ['#fbbf24','#a78bfa','#34d399','#f87171','#60a5fa','#f9a8d4','#fff'];
+
+function drawAnnotations(g, data, getX, getY) {
+  if (!S.showAnn) return;
+  S.annotations.forEach(ann => {
+    const d = data.find(d=>d.sp===ann.species); if(!d) return;
+    const tx = getX(d), ty = getY(d);
+    const lx = tx + ann.dx, ly = ty + ann.dy;
+
+    const ag = g.append('g').attr('class','annotation').attr('data-id',ann.id)
+      .style('cursor','grab');
+
+    // Arrow
+    if (ann.arrow !== 'none') {
+      const path = ann.arrow==='curve'
+        ? `M${lx},${ly} Q${(lx+tx)/2},${(ly+ty)/2-30} ${tx},${ty}`
+        : `M${lx},${ly} L${tx},${ty}`;
+      ag.append('path').attr('d',path).attr('fill','none')
+        .attr('stroke',ann.color).attr('stroke-width',1.5)
+        .attr('stroke-dasharray', ann.arrow==='dashed'?'5,3':'none')
+        .attr('marker-end','url(#arrowhead-'+ann.id+')');
+
+      // Arrowhead marker
+      const mk = svgDefs.append('marker').attr('id','arrowhead-'+ann.id)
+        .attr('markerWidth',8).attr('markerHeight',8).attr('refX',6).attr('refY',3).attr('orient','auto');
+      mk.append('path').attr('d','M0,0 L0,6 L8,3 z').attr('fill',ann.color);
+    }
+
+    // Target dot
+    ag.append('circle').attr('cx',tx).attr('cy',ty).attr('r',5)
+      .attr('fill',ann.color).attr('fill-opacity',.8).attr('stroke',S.dark?'#09090f':'#fff').attr('stroke-width',1.5);
+
+    // Label box
+    const pad = 6, fsize = ann.fontSize||12;
+    const words = ann.text || '';
+    const estW = Math.max(60, words.length*fsize*.52+pad*2);
+    const estH = fsize + pad*2 + 2;
+
+    ag.append('rect').attr('x',lx-estW/2).attr('y',ly-estH/2)
+      .attr('width',estW).attr('height',estH).attr('rx',4)
+      .attr('fill',S.dark?'rgba(15,15,28,.92)':'rgba(255,255,255,.95)')
+      .attr('stroke',ann.color).attr('stroke-width',1.5);
+    ag.append('text').attr('x',lx).attr('y',ly+fsize*.35)
+      .attr('text-anchor','middle').attr('font-size',fsize+'px')
+      .attr('font-weight', ann.bold?'700':'500')
+      .attr('fill',ann.color).attr('pointer-events','none')
+      .text(words);
+
+    // Drag behaviour
+    ag.call(d3.drag()
+      .on('drag', function(e) {
+        ann.dx += e.dx; ann.dy += e.dy;
+        render();
+        renderAnnList();
+      }));
+
+    ag.on('click', e => {
+      e.stopPropagation();
+      S.selectedAnn = ann.id;
+      S.editingAnn  = ann.id;
+      renderAnnList();
+    });
+  });
+}
+
+// ── Annotation placement ──────────────────────────────────────────────────────
+function placeAnnotation(e, d, g, tx, ty) {
+  // Remove any existing popup
+  document.querySelectorAll('.ann-popup').forEach(p=>p.remove());
+
+  S.annotating = false;
+  document.getElementById('viz').classList.remove('annotating');
+  document.getElementById('annModeBtn').classList.remove('ann-mode','on');
+  document.getElementById('annAddBtn').classList.remove('active');
+
+  const wrap = document.querySelector('.chart-wrap');
+  const rect = svgEl.getBoundingClientRect();
+  const popX = Math.min(e.clientX - rect.left + 10, rect.width - 230);
+  const popY = Math.min(e.clientY - rect.top  + 10, rect.height - 200);
+
+  const popup = document.createElement('div');
+  popup.className = 'ann-popup';
+  popup.style.left = popX+'px';
+  popup.style.top  = popY+'px';
+
+  let selColor = '#fbbf24', selArrow = 'curve';
+
+  popup.innerHTML = `
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:7px">Annotate · ${d.sp}</div>
+    <input type="text" id="popupText" placeholder="Annotation text…" autocomplete="off">
+    <div style="display:flex;gap:4px;margin-bottom:7px" id="popupColors">
+      ${ANN_COLORS.map(c=>`<div class="ann-color-chip${c===selColor?' sel':''}" style="background:${c}" data-c="${c}"></div>`).join('')}
+    </div>
+    <div style="font-size:9px;color:var(--muted);margin-bottom:4px">Arrow</div>
+    <div style="display:flex;gap:3px;margin-bottom:8px" id="popupArrows">
+      <button class="ann-arrow-btn sel" data-a="curve">Curve</button>
+      <button class="ann-arrow-btn" data-a="line">Line</button>
+      <button class="ann-arrow-btn" data-a="dashed">Dash</button>
+      <button class="ann-arrow-btn" data-a="none">None</button>
+    </div>
+    <div style="display:flex;gap:5px">
+      <button id="popupSave" style="flex:1;padding:6px;background:var(--gold);border:none;border-radius:4px;color:#000;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Add</button>
+      <button id="popupCancel" style="padding:6px 10px;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;color:var(--muted);font-size:11px;cursor:pointer;font-family:inherit">✕</button>
+    </div>`;
+
+  wrap.appendChild(popup);
+
+  const textInput = popup.querySelector('#popupText');
+  setTimeout(()=>textInput.focus(),50);
+
+  popup.querySelectorAll('.ann-color-chip').forEach(chip=>{
+    chip.onclick=()=>{selColor=chip.dataset.c;popup.querySelectorAll('.ann-color-chip').forEach(c=>c.classList.remove('sel'));chip.classList.add('sel');};
+  });
+  popup.querySelectorAll('.ann-arrow-btn').forEach(btn=>{
+    btn.onclick=()=>{selArrow=btn.dataset.a;popup.querySelectorAll('.ann-arrow-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');};
+  });
+
+  const save = () => {
+    const text = textInput.value.trim(); if(!text){textInput.focus();return;}
+    S.annotations.push({
+      id: Date.now(), species: d.sp, text, color: selColor,
+      arrow: selArrow, dx: -80, dy: -70, fontSize: 12, bold: false
+    });
+    popup.remove();
+    render();
+    renderAnnList();
+  };
+
+  popup.querySelector('#popupSave').onclick = save;
+  popup.querySelector('#popupCancel').onclick = ()=>popup.remove();
+  textInput.onkeydown = e => { if(e.key==='Enter') save(); if(e.key==='Escape') popup.remove(); };
+}
+
+// ── Annotation list in sidebar ────────────────────────────────────────────────
+function renderAnnList() {
+  const list = document.getElementById('annList');
+  list.innerHTML = '';
+  if (!S.annotations.length) {
+    list.innerHTML = `<div style="font-size:10px;color:var(--muted);text-align:center;padding:8px 0">No annotations yet.<br>Click "Add Annotation" then click a data point.</div>`;
+    return;
+  }
+
+  S.annotations.forEach(ann => {
+    const isEditing = S.editingAnn === ann.id;
+    const row = document.createElement('div');
+    row.innerHTML = `
+      <div class="ann-item${S.selectedAnn===ann.id?' selected':''}" data-id="${ann.id}">
+        <div class="ann-dot" style="background:${ann.color}"></div>
+        <span class="ann-text">${ann.text}</span>
+        <button class="ann-btn" data-action="edit" title="Edit">✏️</button>
+        <button class="ann-btn" data-action="del" title="Delete">✕</button>
+      </div>
+      ${isEditing ? buildAnnEditForm(ann) : ''}
+    `;
+    list.appendChild(row);
+
+    row.querySelector('.ann-item').onclick = ()=>{
+      S.selectedAnn = ann.id; renderAnnList();
+    };
+    row.querySelector('[data-action="edit"]').onclick = e=>{
+      e.stopPropagation();
+      S.editingAnn = S.editingAnn===ann.id ? null : ann.id;
+      S.selectedAnn = ann.id;
+      renderAnnList();
+    };
+    row.querySelector('[data-action="del"]').onclick = e=>{
+      e.stopPropagation();
+      S.annotations = S.annotations.filter(a=>a.id!==ann.id);
+      if(S.selectedAnn===ann.id) S.selectedAnn=null;
+      if(S.editingAnn===ann.id) S.editingAnn=null;
+      render(); renderAnnList();
+    };
+
+    if (isEditing) wireAnnEditForm(row, ann);
+  });
+}
+
+function buildAnnEditForm(ann) {
+  return `<div class="ann-edit-form">
+    <input type="text" class="ann-edit-text" value="${ann.text}" placeholder="Annotation text…">
+    <div style="font-size:9px;color:var(--muted);margin-bottom:4px">Color</div>
+    <div class="ann-color-row">
+      ${ANN_COLORS.map(c=>`<div class="ann-color-chip${c===ann.color?' sel':''}" style="background:${c}" data-c="${c}"></div>`).join('')}
+    </div>
+    <div style="font-size:9px;color:var(--muted);margin-bottom:4px">Arrow</div>
+    <div class="ann-arrow-row">
+      ${['curve','line','dashed','none'].map(a=>`<button class="ann-arrow-btn${ann.arrow===a?' sel':''}" data-a="${a}">${a.charAt(0).toUpperCase()+a.slice(1)}</button>`).join('')}
+    </div>
+    <div style="font-size:9px;color:var(--muted);margin-bottom:4px">Font size: <span class="ann-fs-val">${ann.fontSize||12}</span></div>
+    <input type="range" class="ann-fs-slider" min="9" max="20" value="${ann.fontSize||12}">
+    <div class="ann-form-btns" style="margin-top:6px">
+      <button class="ann-save">Save</button>
+      <button class="ann-cancel">Cancel</button>
+    </div>
+  </div>`;
+}
+
+function wireAnnEditForm(row, ann) {
+  const textInput = row.querySelector('.ann-edit-text');
+  const fsSlider  = row.querySelector('.ann-fs-slider');
+  const fsVal     = row.querySelector('.ann-fs-val');
+
+  row.querySelectorAll('.ann-color-chip').forEach(c=>{
+    c.onclick=()=>{
+      ann.color=c.dataset.c;
+      row.querySelectorAll('.ann-color-chip').forEach(x=>x.classList.remove('sel'));
+      c.classList.add('sel');
+      render(); renderAnnList();
+    };
+  });
+  row.querySelectorAll('.ann-arrow-btn').forEach(b=>{
+    b.onclick=()=>{
+      ann.arrow=b.dataset.a;
+      row.querySelectorAll('.ann-arrow-btn').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel');
+      render();
+    };
+  });
+  if(fsSlider) fsSlider.oninput=e=>{ann.fontSize=+e.target.value;if(fsVal)fsVal.textContent=ann.fontSize;render();};
+
+  row.querySelector('.ann-save').onclick=()=>{
+    ann.text=textInput.value.trim()||ann.text;
+    S.editingAnn=null;
+    render(); renderAnnList();
+  };
+  row.querySelector('.ann-cancel').onclick=()=>{
+    S.editingAnn=null; renderAnnList();
+  };
+  textInput.oninput=e=>{ann.text=e.target.value;render();};
+}
+
+// ── Title/subtitle wiring ─────────────────────────────────────────────────────
+document.getElementById('sideTitle').oninput = e => { S.title = e.target.value; render(); };
+document.getElementById('sideSub').oninput   = e => { S.subtitle = e.target.value; render(); };
+document.getElementById('titleAlign').onchange = e => { S.titleAlign = e.target.value; render(); };
+document.getElementById('titleSize').onchange  = e => { S.titleSize = +e.target.value; render(); };
+
+// ── Control wiring ────────────────────────────────────────────────────────────
+document.querySelectorAll('.btn[data-chart]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.btn[data-chart]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); S.chart=b.dataset.chart;
+  const orientRow = document.getElementById('orientRow');
+  orientRow.style.display = (S.chart==='bar'||S.chart==='lollipop') ? 'flex' : 'none';
+  render();
+});
+
+document.querySelectorAll('.btn[data-orient]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.btn[data-orient]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); S.orient=b.dataset.orient; render();
+});
+
+document.querySelectorAll('input[name="metric"]').forEach(i=>i.onchange=()=>{
+  document.querySelectorAll('.radio-opt').forEach(x=>x.classList.remove('active'));
+  i.closest('.radio-opt').classList.add('active'); S.metric=i.value; render();
+});
+
+document.querySelectorAll('.btn[data-scale]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.btn[data-scale]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); S.scale=b.dataset.scale; render();
+});
+
+document.getElementById('sortBy').onchange=e=>{S.sort=e.target.value;render();};
+
+document.querySelectorAll('.btn[data-color]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.btn[data-color]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); S.colorMode=b.dataset.color; render();
+});
+
+document.getElementById('rxSlider').oninput=e=>{S.rx=+e.target.value;document.getElementById('rxVal').textContent=S.rx;render();};
+document.getElementById('imgSzSlider').oninput=e=>{S.imgSz=+e.target.value;document.getElementById('imgSzVal').textContent=S.imgSz;render();};
+
+document.getElementById('togArt').onchange=e=>{S.showArt=e.target.checked;render();};
+document.getElementById('togLabels').onchange=e=>{S.showLabels=e.target.checked;render();};
+document.getElementById('togCard').onchange=e=>{S.showCard=e.target.checked;};
+document.getElementById('togGrid').onchange=e=>{S.showGrid=e.target.checked;render();};
+document.getElementById('togAnn').onchange=e=>{S.showAnn=e.target.checked;render();};
+document.getElementById('togDark').onchange=e=>{S.dark=e.target.checked;render();};
+
+document.querySelectorAll('.speed-btn').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.speed-btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); S.speed=b.dataset.speed;
+});
+document.getElementById('togStagger').onchange=e=>{S.stagger=e.target.checked;};
+
+// Annotation mode toggle
+const annModeBtn  = document.getElementById('annModeBtn');
+const annAddBtn   = document.getElementById('annAddBtn');
+function toggleAnnotating() {
+  S.annotating = !S.annotating;
+  document.getElementById('viz').classList.toggle('annotating', S.annotating);
+  annModeBtn.classList.toggle('ann-mode', S.annotating);
+  annAddBtn.classList.toggle('active', S.annotating);
+  document.querySelectorAll('.ann-popup').forEach(p=>p.remove());
+}
+annModeBtn.onclick = toggleAnnotating;
+annAddBtn.onclick  = toggleAnnotating;
+document.getElementById('replayBtn').onclick = render;
+
+// ── Export ─────────────────────────────────────────────────────────────────────
+document.getElementById('btnSVG').onclick=()=>{
+  const clone=svgEl.cloneNode(true);
+  clone.style.background=S.dark?'#09090f':'#f8fafc';
+  let src=new XMLSerializer().serializeToString(clone);
+  if(!src.match(/^<svg[^>]+xmlns=/))src=src.replace(/^<svg/,'<svg xmlns="http://www.w3.org/2000/svg"');
+  const a=document.createElement('a');a.href='data:image/svg+xml;charset=utf-8,'+encodeURIComponent('<?xml version="1.0"?>\n'+src);
+  a.download=(S.title||'eeveelutions').replace(/\s+/g,'-').toLowerCase()+'.svg';a.click();
+};
+
+document.getElementById('btnPNG').onclick=()=>{
+  const W=svgEl.clientWidth,H=svgEl.clientHeight;
+  const clone=svgEl.cloneNode(true);clone.setAttribute('width',W);clone.setAttribute('height',H);
+  clone.style.background=S.dark?'#09090f':'#f8fafc';
+  let src=new XMLSerializer().serializeToString(clone);
+  if(!src.match(/^<svg[^>]+xmlns=/))src=src.replace(/^<svg/,'<svg xmlns="http://www.w3.org/2000/svg"');
+  const blob=new Blob([src],{type:'image/svg+xml'});const url=URL.createObjectURL(blob);
+  const img=new Image();img.onload=()=>{
+    const cv=document.createElement('canvas');cv.width=W*2;cv.height=H*2;
+    const ctx=cv.getContext('2d');ctx.scale(2,2);
+    ctx.fillStyle=S.dark?'#09090f':'#f8fafc';ctx.fillRect(0,0,W,H);ctx.drawImage(img,0,0);
+    URL.revokeObjectURL(url);
+    const a=document.createElement('a');a.download=(S.title||'eeveelutions').replace(/\s+/g,'-').toLowerCase()+'.png';a.href=cv.toDataURL('image/png');a.click();
+  };img.src=url;
+};
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+renderAnnList();
+render();
+window.onresize=render;
+</script>
+</body>
+</html>
